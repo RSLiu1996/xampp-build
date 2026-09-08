@@ -93,7 +93,8 @@
     constructor {environment} {
 	chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
     public method preparefordist {} {
         chain
@@ -127,7 +128,8 @@
     constructor {environment} {
 	    chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
 }
 ::itcl::class windows64XamppApachePhp81 {
@@ -135,7 +137,8 @@
     constructor {environment} {
 	    chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
 }
 ::itcl::class windows64XamppApachePhp82 {
@@ -143,7 +146,8 @@
     constructor {environment} {
 	    chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
 }
 ::itcl::class windows64XamppApachePhp83 {
@@ -151,7 +155,8 @@
     constructor {environment} {
 	    chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
 }
 ::itcl::class windows64XamppApachePhp84 {
@@ -159,7 +164,8 @@
     constructor {environment} {
 	    chain $environment
     } {
-        set tarballName httpd-${version}-win64-VS17.zip
+        # changed to vs18 and added timestamp in filename
+        set tarballName httpd-${version}-260827-Win64-VS18.zip
     }
 }
 
@@ -353,6 +359,7 @@
     }
 }
 
+# OpenSSL Version should be in the 3s, the version is fully dependent on what is packaged with Apache
 ::itcl::class windows64XamppPhp82 {
   inherit windows64XamppPhp8
     constructor {environment} {
@@ -361,7 +368,7 @@
         set name windows64XamppPhp82
         set version [::xampp::php::getXAMPPVersion 82]
         set rev [::xampp::php::getXAMPPRevision 82]
-        set vcVersion VS16
+        set vcVersion vs16
         set opensslVersion 1.1.1p
         set tarballName php-${version}-Win32-${vcVersion}-x64.zip
     }

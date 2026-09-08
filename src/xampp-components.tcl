@@ -222,10 +222,15 @@ namespace eval xampp {
             chain $environment
         } {
             set name cmake
-            set version 3.6.1
+            set version 4.4.2
         }
         public method configureOptions {} {
-            #return [list --system-curl]
+            # CMake later than 4.0 have much stricter dependency checking
+            set common [file join [$be cget -output] [$be cget -libprefix]]
+            # Since libiconv is built from source and is not installed on the system have to ensure CMake is aware of where
+            # the lib/ and include/ directories are; ./configure will pass all arguments after -- will be passed into CMake
+            # phase once the bootstrapping phase is done
+            return [concat [chain] [list -- -DLIBICONV_PATH=$common/lib/libiconv.so -DICONV_INCLUDE_DIR=$common/include]]
         }
     }
 
@@ -539,7 +544,7 @@ namespace eval xampp {
             chain $environment
         } {
             set name ncurses
-            set version 5.9
+            set version 6.6
             set licenseRelativePath {}
             set licenseNotes ""
         }
@@ -578,13 +583,13 @@ namespace eval xampp {
     }
 
 
-    ::itcl::class pcre {
+    ::itcl::class pcre2 {
         inherit xamppLibrary
         constructor {environment} {
             chain $environment
         } {
-            set name "pcre"
-            set version 8.40
+            set name "pcre2"
+            set version 10.47
         }
 
         public method setEnvironment {} {
@@ -765,7 +770,7 @@ namespace eval xampp {
             chain $environment
         } {
             set name expat
-            set version 2.0.1
+            set version 2.8.3
             set licenseRelativePath COPYING
             set licenseNotes "MIT http://www.jclark.com/xml/copying.txt"
         }
@@ -797,7 +802,7 @@ namespace eval xampp {
             set name "openssl"
             set name OpenSSL
             set version [versions::get "OpenSSL" stable]
-            set licenseRelativePath LICENSE
+            set licenseRelativePath LICENSE.txt
             set supportsParallelBuild 0
             if { [$be cget -target] == "osx-x64" } {
             #gcc issue interpreting binary symbols (https://www.mail-archive.com/openssl-dev%40openssl.org/msg43035.html)
@@ -923,7 +928,7 @@ namespace eval xampp {
             chain $environment
         } {
             set name "openldap"
-            set version 2.4.48
+            set version 2.7.0
             set licenseRelativePath LICENSE
         }
         public method configureOptions {} {
@@ -1032,7 +1037,7 @@ namespace eval xampp {
         } {
             set name "xampp-skeleton"
             set version 1.8.6
-            set rev 10
+            set rev 12
             set tarballName xampp-skeleton-dev-unix-${version}-${rev}
             set licenseRelativePath ""
             set licenseNotes ""
@@ -1141,7 +1146,7 @@ UseFtpUsers}]
         } {
             set name "xampp-skeleton"
             set version 1.8.6
-            set rev 11
+            set rev 12
             set tarballName xampp-skeleton-dev-unix-${version}-${rev}
         }
     }
@@ -1246,12 +1251,12 @@ UseFtpUsers}]
             chain $environment
         } {
             set name "curl"
-            set version 7.53.1
+            set version 8.21.0
             set licenseRelativePath COPYING
             set licenseNotes http://curl.haxx.se/legal/licmix.html
         }
         public method configureOptions {} {
-            return [concat [chain] [list --with-ssl=[prefix] --with-ca-bundle=[file join [$be cget -output] share/curl/curl-ca-bundle.crt]]]
+            return [concat [chain] [list --with-ssl=[prefix] --with-libpsl=[prefix]/lib --with-ca-bundle=[file join [$be cget -output] share/curl/curl-ca-bundle.crt]]]
         }
         public method build {} {
             foreach var {LDFLAGS CPPFLAGS CFLAGS} {
@@ -1517,7 +1522,7 @@ UseFtpUsers}]
                                          --with-expat=[prefix] --enable-dav --enable-dav-fs --enable-mods-shared=most --with-mpm=prefork \
                                          --with-suexec-caller=nobody --with-suexec-docroot=[prefix]/htdocs --without-berkeley-db --enable-ldap --with-ldap --enable-auth-ldap \
                                          --enable-authnz-ldap --enable-ipv6 --enable-dbd --enable-https --with-nghttp2=[prefix] --with-mysql=[prefix] --with-apr=[prefix]/bin/apr-1-config \
-                                         --with-apr-util=[prefix]/bin/apu-1-config --with-pcre=[prefix] --enable-modules=all]]
+                                         --with-apr-util=[prefix]/bin/apu-1-config --with-pcre=[prefix]/bin --enable-modules=all]]
             lappend list --enable-ssl --with-ssl=$::opts(openssl.prefix)
             return $list
         }
@@ -1828,7 +1833,7 @@ UseFtpUsers}]
         } {
             set name "mariadb"
             set fullname MariaDB
-            set version [versions::get "MariaDB" "10"]
+            set version [versions::get "MariaDB" 10]
             if {[$be targetPlatform] == "osx-x64"} {
                 set patchList {TokuDB-MacOS.patch mariadb-clock_realtime.patch}
             }
@@ -1878,7 +1883,7 @@ UseFtpUsers}]
             showEnvironmentVars
 
             # Start building
-            eval logexec cmake . -DCMAKE_INSTALL_PREFIX=[prefix] -DINSTALL_PLUGINDIR=lib/mysql/plugin -DENABLED_LOCAL_INFILE=ON -DMYSQL_UNIX_ADDR=[prefix]/var/mysql/mysql.sock -DINSTALL_SBINDIR=sbin -DSYSCONFDIR=[prefix]/etc  -DDEFAULT_SYSCONFDIR=[prefix]/etc -DMYSQL_DATADIR=[prefix]/var/mysql -DINSTALL_INFODIR=[prefix]/info -DWITH_SSL=system -DWITH_INNOBASE_STORAGE_ENGINE=1 -DWITH_ARCHIVE_STORAGE_ENGINE=1 -DWITH_BLACKHOLE_STORAGE_ENGINE=1 -DWITH_PERFSCHEMA_STORAGE_ENGINE=1 -DWITH_FEDERATED_STORAGE_ENGINE=1 -DWITH_PARTITION_STORAGE_ENGINE=1  -DOPENSSL_INCLUDE_DIR=[prefix]/include -DOPENSSL_ROOT_DIR=[prefix]/ -DINSTALL_SCRIPTDIR=[prefix]/bin -DINSTALL_SUPPORTFILESDIR=[prefix]/share/mysql -DCMAKE_PREFIX_PATH=[prefix]/include/ncurses/ -DCURSES_INCLUDE_PATH=[prefix]/include/ncurses/ -DPLUGIN_TOKUDB=NO -DWITHOUT_MROONGA_STORAGE_ENGINE=YES
+            eval logexec cmake . -DCMAKE_INSTALL_PREFIX=[prefix] -DINSTALL_PLUGINDIR=lib/mysql/plugin -DENABLED_LOCAL_INFILE=ON -DMYSQL_UNIX_ADDR=[prefix]/var/mysql/mysql.sock -DINSTALL_SBINDIR=sbin -DSYSCONFDIR=[prefix]/etc  -DDEFAULT_SYSCONFDIR=[prefix]/etc -DMYSQL_DATADIR=[prefix]/var/mysql -DINSTALL_INFODIR=[prefix]/info -DWITH_SSL=system -DWITH_INNOBASE_STORAGE_ENGINE=1 -DWITH_ARCHIVE_STORAGE_ENGINE=1 -DWITH_BLACKHOLE_STORAGE_ENGINE=1 -DWITH_PERFSCHEMA_STORAGE_ENGINE=1 -DWITH_FEDERATED_STORAGE_ENGINE=1 -DWITH_PARTITION_STORAGE_ENGINE=1  -DOPENSSL_INCLUDE_DIR=[prefix]/include -DOPENSSL_ROOT_DIR=[prefix]/ -DINSTALL_SCRIPTDIR=[prefix]/bin -DINSTALL_SUPPORTFILESDIR=[prefix]/share/mysql -DCMAKE_PREFIX_PATH=[prefix]/include -DCURSES_LIBRARY=[prefix]/lib/libncursesw.so -DCURSES_INCLUDE_PATH=[prefix]/include/ncursesw -DPLUGIN_TOKUDB=NO -DWITHOUT_MROONGA_STORAGE_ENGINE=YES
 
             # MariaDB is intended to be compiled using the OS-X system "libtool" library which includes the "-static" option.
             # The GNU "libtool" we add as a build dependency, since PHP requires, it does not have that option.
@@ -1890,6 +1895,9 @@ UseFtpUsers}]
             if {[string match osx* [$be cget -target]]} {
                 xampptcl::util::substituteParametersInFile /Library/Developer/CommandLineTools/usr/include/c++/v1/iterator [list "mutable _Iter" "/* mutable */ _Iter"]
             }
+            # upgrade to cmake instead of make - MariaDB supports which has better cross-platform support
+            # when configuring with cmake it destroys all Makefile files, so when make is called it rebuilds from scratch each time
+            # eval logexec cmake --build .
             eval logexec [make]
             if {[string match osx* [$be cget -target]]} {
                 xampptcl::util::substituteParametersInFile /Library/Developer/CommandLineTools/usr/include/c++/v1/iterator [list "/* mutable */ _Iter" "mutable _Iter"]
@@ -1916,7 +1924,7 @@ UseFtpUsers}]
             chain $environment
         } {
             set name "ncurses"
-            set version 5.9
+            set version 6.6
             set licenseRelativePath ANNOUNCE
             set licenseNotes http://www.gnu.org/software/ncurses/ncurses.html
            if { [$be cget -target] == "osx-x64" } {
@@ -1987,6 +1995,16 @@ UseFtpUsers}]
         }
         public method configureOptions {} {
             return [concat [chain] [list --enable-shared --with-ssl]]
+        }
+        public method build {} {
+            set ldflags $::env(LDFLAGS)
+            set common [file join [$be cget -output] [$be cget -libprefix]]
+            set ::env(LDFLAGS) "-L$common/lib -liconv"
+            
+            showEnvironmentVars
+            chain
+
+            set ::env(LDFLAGS) $ldflags
         }
     }
 
@@ -2140,21 +2158,20 @@ UseFtpUsers}]
 
     ::itcl::class zziplib {
         inherit xamppLibrary
+        # python3/zip are build time dependencies for zziplib, both are installed as part of the Dockerfile
         constructor {environment} {
             chain $environment
         } {
             set name "zziplib"
-            set version 0.13.23
-            # this one requires python, not available in the xampp chroot...
-            #set version 0.13.62
+            set version 0.13.80
             set licenseRelativePath COPYING.LIB
         }
-        public method configureOptions {} {
-            return [concat [chain] [list --with-zlib=[prefix]]]
-        }
+        # zziplib recent versions have upgraded their build to use cmake
         public method build {} {
-            xampptcl::util::substituteParametersInFile [srcdir]/bins/zziptest.c [list {(char *)hdr += hdr->d_reclen;} {hdr = (char *)hdr + hdr->d_reclen;}]
-            chain
+            cd [srcdir]
+            eval logexec cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=[prefix]
+            eval logexec cmake --build .
+            # xampptcl::util::substituteParametersInFile [srcdir]/bins/zziptest.c [list {(char *)hdr += hdr->d_reclen;} {hdr = (char *)hdr + hdr->d_reclen;}]
         }
     }
 
@@ -2213,23 +2230,19 @@ UseFtpUsers}]
         }
     }
 
-    ::itcl::class gd {
-        inherit xamppLibraryCommon ::gd
+    # this has changed its name and tarball to libgd instead of gd
+    ::itcl::class libgd {
+        inherit xamppLibraryCommon ::libgd
         constructor {environment} {
-            ::gd::constructor $environment
+            ::libgd::constructor $environment
         } {
-            set version 2.2.5
+            set version 2.3.3
         }
-        public method srcdir {} {
-            return [file join [$be cget -src] "libgd-gd-$version"]
-        }
+        # Do not need to change srcdir name anymore the old version when untarred would rename the directory
         public method cmakeOptions {} {
-            return [list -DCMAKE_INSTALL_PREFIX=[$be cget -output] -DENABLE_FONTCONFIG=0 -DENABLE_XPM=0 \
-                        -DENABLE_PNG=1 -DPNG_LIBRARY=[$be cget -output] -DPNG_PNG_INCLUDE_DIR=[$be cget -output]/include \
-                        -DENABLE_JPEG=1 -DJPEG_LIBRARY=[$be cget -output] -DJPEG_INCLUDE_DIR=[$be cget -output]/include \
-                        -DENABLE_TIFF=1 -DTIFF_LIBRARY=[$be cget -output] -DTIFF_INCLUDE_DIR=[$be cget -output]/include \
-                        -DENABLE_FREETYPE=1 -DFREETYPE_LIBRARY=[$be cget -output] -DFREETYPE_INCLUDE_DIRS=[$be cget -output]/include \
-                        -DENABLE_WEBP=1 -DWEBP_LIBRARY=[$be cget -output]]
+            return [list -DCMAKE_PREFIX_PATH=[$be cget -output] -DENABLE_FONTCONFIG=0 -DENABLE_XPM=0 \
+                        -DENABLE_PNG=1 -DENABLE_JPEG=1 -DENABLE_TIFF=1 -DENABLE_FREETYPE=1 \
+                        -DWEBP_INCLUDE_DIR=[$be cget -output]/include -DWEBP_LIBRARY=[$be cget -output]/lib/libwebp.so -DENABLE_WEBP=1 ]
         }
 
         public method build {} {
@@ -2249,6 +2262,8 @@ UseFtpUsers}]
             ::xampptcl::file::write [file join [srcdir] .buildcomplete] {}
         }
         public method install {} {
+            cd [srcdir]
+
             # Avoid issue setting mkdir command before running make
             xampptcl::util::substituteParametersInFileRegex [srcdir]/Makefile \
                 [list {mkdir_p\s*=[^\n]*} {mkdir_p = /bin/mkdir -p}]
@@ -2347,7 +2362,7 @@ UseFtpUsers}]
             chain $environment
         } {
             set name modperl
-            set version 2.0.12
+            set version 2.0.13
             set licenseRelativePath LICENSE
             set tarballName mod_perl-$version
         }
