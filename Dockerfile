@@ -8,7 +8,7 @@ ARG IB_VERSION=26.5.1
 
 # Install necessary tools and dependencies
 RUN apt-get update && apt-get install -y \
-    ca-certificates file m4 gcc g++ make perl patch unzip bzip2 curl python3 zip \
+    ca-certificates file m4 gcc g++ make perl patch unzip bzip2 curl python3 zip git ninja-build \
     p7zip-full p7zip-rar tcl tk tcllib itcl3 tcl-vfs tdom \
     && apt-get clean
 

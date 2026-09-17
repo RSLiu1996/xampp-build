@@ -209,7 +209,8 @@
     } {
         set name windows64XamppMariaDb
         set fullname MariaDB
-        set version [versions::get "MariaDB" "10"]
+        # change which version of MariaDB is loaded easily by swapping between 10, 11, and 12
+        set version [versions::get "MariaDB" 12]
         set tarballName mariadb-${version}-winx64.zip
         set pathName mariadb-${version}-winx64
         lappend additionalFileList vcruntime140_1.dll
