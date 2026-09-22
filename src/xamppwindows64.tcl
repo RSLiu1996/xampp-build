@@ -540,7 +540,9 @@
         chain $environment
     } {
         set name windows64XamppTomcat
-        set version [versions::get "Tomcat" "85"]
+        # can toggle tomcat between 85, 9, 10, 11
+        # xampp control panel disables all buttons for anything not Tomcat85 (bug should be patched in new control panel)
+        set version [versions::get "Tomcat" 85]
         set licenseRelativePath {}
         set tarballName apache-tomcat-${version}-windows-x64.zip
         set mainComponentXMLName xampp-tomcat
@@ -556,6 +558,32 @@
         copyFromWorkspace tomcat/catalina_start.bat tomcat/catalina_stop.bat tomcat/tomcat_service_install.bat tomcat/tomcat_service_uninstall.bat
     }
 }
+
+::itcl::class windows64XamppOpenJDK {
+  inherit windowsXamppComponent
+    constructor {environment} {
+        chain $environment
+    } {
+        set name windows64XamppOpenJDK
+        set version [versions::get "OpenJDK" 27]
+        set licenseRelativePath {}
+        set tarballName openjdk-${version}_windows-x64_bin.zip
+        set mainComponentXMLName xampp-openjdk
+    }
+    public method install {} {
+        chain
+        file copy -force [file join [$be cget -src] jdk-${version}] [file join $xamppoutputdir openjdk]
+        setReadmeVersion OPENJDK ${version}
+    }
+
+    public method prepareXmlFiles {} {
+        # must modify the xampp-server.xml
+        set endComponentList "</componentList>"
+        set openJDKInjection "  <include file=\"xampp-openjdk.xml\" />\n$endComponentList"
+        xampptcl::util::substituteParametersInFileRegex [file join [$be cget -output] xampp-server.xml] [list $endComponentList $openJDKInjection] 1
+    }
+}
+
 
 ::itcl::class windows64XamppInstallerStack {
     inherit stack

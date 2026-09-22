@@ -50,6 +50,18 @@ tclsh createstack.tcl pack xamppinstaller82stack windows-x64
 
 The installers will be accessible at `/opt/installbuilder/output/`.
 
+## Optional Components
+
+Currently supported only for OpenJDK and Windows versions of XAMPP.
+
+```
+tclsh createstack.tcl pack xamppinstaller82stack windows-x64 addComponents java
+```
+
+After the `addComponents` flag add a comma separated list of optional components to include. `Example: addComponents "java, python"`. Currently only java is supported for the Windows XAMPP installer, but this feature will be expanded to include more components across all of the architectures.
+
+This is an easy way to add extra components to a given core stack. Including `openjdk` first was done because the current version of XAMPP Windows has Tomcat as a default service which needs an instance of OpenJDK installed to run. If you want XAMPP on Windows to fully work out of the box then use the `addComponents java`. This is an optional feature though as some of these optional components greatly increase the size of XAMPP installer binary and should be an opt-in feature to include them.
+
 ## License
 
 

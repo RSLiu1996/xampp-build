@@ -50,7 +50,7 @@
         set name windowsXamppWorkspace
         set version 12
         set licenseRelativePath {}
-        set rev 0
+        set rev 1
         set controlPanelVersion "3.3.0"
         set tarballName xampp-windows-workspace-${version}-${rev}.zip
     }
