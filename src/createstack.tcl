@@ -116,9 +116,7 @@ proc commandSupportsExtraArgs {cmd} {
     }
 }
 
-# Parse out any --additionalComponent flags before processing it as normal
-# Easy way to add optional components to existing XAMPP stacks OpenJDK, Python, Ruby, Git, etc
-# Done like this to prevent the huge additional stack matrix to include optional components for a batteries included xampp installer
+# Parse optional components after addComponents flag (limits large number of stacks to maintain)
 set optionalComponents [list]
 set cleanArgv [list]
 
